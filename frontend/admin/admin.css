@@ -1,0 +1,115 @@
+/* admin.css – Kanban Board Styles */
+
+.kanban-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.kanban-table th,
+.kanban-table td {
+  border: 1px dashed var(--color-text);
+  vertical-align: top;
+  padding: 1rem;
+  width: 33.33%;
+}
+
+.kanban-table th {
+  background-color: var(--color-primary);
+  color: #fff;
+  text-align: center;
+  font-size: 1.1rem;
+  padding: 0.75rem;
+}
+
+.case-card {
+  position: relative;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem 1rem;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.token {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.card-menu-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.card-menu {
+  position: absolute;
+  top: 1.5rem;
+  right: 1rem;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: var(--shadow-md);
+  list-style: none;
+  padding: 0.25rem 0;
+  display: none;
+  z-index: 10;
+}
+
+.card-menu li {
+  margin: 0;
+}
+
+.card-menu li a {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: background var(--transition);
+}
+
+.card-menu li a:hover {
+  background: var(--bg-secondary);
+}
+
+.case-card:hover .card-menu-btn {
+  color: var(--primary-color);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #fff;
+  margin-top: 0.5rem;
+}
+
+.badge-high { background: var(--color-danger); }
+.badge-medium { background: var(--color-warning); }
+.badge-low { background: var(--color-success); }
+
+.load-more {
+  display: block;
+  margin-top: 0.5rem;
+  text-align: center;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .kanban-table th,
+  .kanban-table td {
+    display: block;
+    width: 100%;
+  }
+}

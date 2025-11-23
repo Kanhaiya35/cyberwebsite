@@ -1,0 +1,50 @@
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const { registerReporter, loginReporter, getMe, updateProfile } = require('../controllers/reporterController');
+const { protect } = require('../middleware/authMiddleware');
+
+const { validateReporterRegistration } = require('./validation');
+
+// Multer config for profile photos
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, '../uploads/profiles/'))
+    },
+    filename: function (req, file, cb) {
+        cb(null, 'profile-' + Date.now() + path.extname(file.originalname))
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit for profile photos
+    },
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed!'));
+        }
+    }
+});
+
+// Ensure profiles directory exists
+const fs = require('fs');
+const profilesDir = path.join(__dirname, '../uploads/profiles/');
+if (!fs.existsSync(profilesDir)) {
+    fs.mkdirSync(profilesDir, { recursive: true });
+}
+
+router.post('/register', upload.single('profilePhoto'), validateReporterRegistration, registerReporter);
+router.post('/login', loginReporter);
+router.get('/profile', protect, getMe);
+router.put('/profile', protect, upload.single('profilePhoto'), updateProfile);
+
+module.exports = router;

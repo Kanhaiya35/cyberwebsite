@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile | CyberSafe Portal</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/toast.js"></script>
+  <script src="../js/main.js" defer></script>
+  <script src="../js/reporter.js" defer></script>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container nav-wrapper">
+      <a href="dashboard.html" class="logo"><i class="fas fa-shield-alt"></i> CyberSafe</a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="profile.html" class="active">Profile</a></li>
+      </ul>
+      <a href="#" onclick="logout()" class="btn btn-outline">Logout</a>
+    </div>
+  </nav>
+
+  <main class="dashboard-container">
+    <div class="dashboard-card">
+      <div class="dashboard-header">
+        <h1>My Profile</h1>
+        <p>Manage your personal information and contact details.</p>
+      </div>
+
+      <form id="profileForm" enctype="multipart/form-data">
+        <div class="form-grid">
+          <div class="form-group full-width" style="text-align: center; margin-bottom: 30px;">
+            <div style="position: relative; display: inline-block;">
+              <img id="profilePhotoPreview" src="" alt="Profile Photo" 
+                   style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-color); display: none;">
+              <div id="profilePhotoPlaceholder" 
+                   style="width: 150px; height: 150px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <i class="fas fa-user" style="font-size: 60px; color: white;"></i>
+              </div>
+              <label for="profilePhoto" style="cursor: pointer; display: block; margin-top: 10px;">
+                <i class="fas fa-camera"></i> Change Photo
+              </label>
+              <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*" style="display: none;">
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" readonly
+              style="background-color: #e5e7eb; cursor: not-allowed;">
+            <small style="color: var(--text-secondary);">Email cannot be changed</small>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" required>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="address">Address</label>
+            <textarea id="address" name="address" rows="3" placeholder="Enter your address"></textarea>
+          </div>
+        </div>
+
+        <div style="margin-top: 30px; text-align: right;">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+</body>
+
+</html>

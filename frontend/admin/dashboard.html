@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard | CyberSafe Portal</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container nav-wrapper">
+      <a href="../index.html" class="logo"><i class="fas fa-shield-alt"></i> CyberSafe Admin</a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="profile.html">Profile</a></li>
+      </ul>
+      <a href="#" onclick="logout()" class="btn btn-outline">Logout</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h1>Case Management Board</h1>
+    <table class="kanban-table">
+      <thead>
+        <tr>
+          <th>New / Pending</th>
+          <th>In Progress</th>
+          <th>Completed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <!-- NEW / PENDING column -->
+          <td id="col-new">
+            <div class="case-card" data-token="ABC123">
+              <div class="card-header">
+                <span class="token">ABC123</span>
+                <button class="card-menu-btn">&#x22EE;</button>
+                <ul class="card-menu">
+                  <li><a href="#" class="view-details">View Details</a></li>
+                  <li><a href="#" class="move-case" data-target="in-progress">Move to In Progress</a></li>
+                  <li><a href="#" class="move-case" data-target="completed">Move to Completed</a></li>
+                </ul>
+              </div>
+              <div class="type">Phishing Scam</div>
+              <div class="reporter">John Doe</div>
+              <span class="badge badge-high">High</span>
+            </div>
+
+            <div class="case-card" data-token="DEF456">
+              <div class="card-header">
+                <span class="token">DEF456</span>
+                <button class="card-menu-btn">&#x22EE;</button>
+                <ul class="card-menu">
+                  <li><a href="#" class="view-details">View Details</a></li>
+                  <li><a href="#" class="move-case" data-target="in-progress">Move to In Progress</a></li>
+                  <li><a href="#" class="move-case" data-target="completed">Move to Completed</a></li>
+                </ul>
+              </div>
+              <div class="type">Data Breach</div>
+              <div class="reporter">Jane Smith</div>
+              <span class="badge badge-medium">Medium</span>
+            </div>
+
+            <span class="load-more">+ Load More</span>
+          </td>
+
+          <!-- IN PROGRESS column -->
+          <td id="col-in-progress">
+            <div class="case-card" data-token="GHI789">
+              <div class="card-header">
+                <span class="token">GHI789</span>
+                <button class="card-menu-btn">&#x22EE;</button>
+                <ul class="card-menu">
+                  <li><a href="#" class="view-details">View Details</a></li>
+                  <li><a href="#" class="move-case" data-target="completed">Move to Completed</a></li>
+                </ul>
+              </div>
+              <div class="type">Ransomware Attack</div>
+              <div class="reporter">Alice Lee</div>
+              <span class="badge badge-high">High</span>
+            </div>
+            <span class="load-more">+ Load More</span>
+          </td>
+
+          <!-- COMPLETED column -->
+          <td id="col-completed">
+            <div class="case-card" data-token="JKL012">
+              <div class="card-header">
+                <span class="token">JKL012</span>
+                <button class="card-menu-btn">&#x22EE;</button>
+                <ul class="card-menu">
+                  <li><a href="#" class="view-details">View Details</a></li>
+                  <li><a href="#" class="move-case" data-target="in-progress">Reopen (In Progress)</a></li>
+                </ul>
+              </div>
+              <div class="type">Identity Theft</div>
+              <div class="reporter">Bob Kumar</div>
+              <span class="badge badge-low">Low</span>
+            </div>
+            <span class="load-more">+ Load More</span>
+            <!DOCTYPE html>
+            <html lang="en">
+
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>Admin Dashboard | CyberSafe Portal</title>
+              <link rel="stylesheet" href="../css/style.css">
+              <link rel="stylesheet" href="admin.css">
+            </head>
+
+            <body>
+              <!-- Navbar -->
+              <nav class="navbar">
+                <div class="container nav-wrapper">
+                  <a href="../index.html" class="logo"><i class="fas fa-shield-alt"></i> CyberSafe Admin</a>
+                  <a href="../logout" class="btn btn-outline">Logout</a>
+                </div>
+              </nav>
+
+              <main class="container">
+                <h1>Case Management Board</h1>
+                <table class="kanban-table">
+                  <thead>
+                    <tr>
+                      <th>New / Pending</th>
+                      <th>In Progress</th>
+                      <th>Completed</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <!-- NEW / PENDING column -->
+                      <td id="col-new">
+                        <div class="case-card" data-token="ABC123">
+                          <div class="card-header">
+                            <span class="token">ABC123</span>
+                            <button class="card-menu-btn">&#x22EE;</button>
+                            <ul class="card-menu">
+                              <li><a href="#" class="view-details">View Details</a></li>
+                              <li><a href="#" class="move-case" data-target="in-progress">Move to In Progress</a></li>
+                              <li><a href="#" class="move-case" data-target="completed">Move to Completed</a></li>
+                            </ul>
+                          </div>
+                          <div class="type">Phishing Scam</div>
+                          <div class="reporter">John Doe</div>
+                          <span class="badge badge-high">High</span>
+                        </div>
+
+                        <div class="case-card" data-token="DEF456">
+                          <div class="card-header">
+                            <span class="token">DEF456</span>
+                            <button class="card-menu-btn">&#x22EE;</button>
+                            <ul class="card-menu">
+                              <li><a href="#" class="view-details">View Details</a></li>
+                              <li><a href="#" class="move-case" data-target="in-progress">Move to In Progress</a></li>
+                              <li><a href="#" class="move-case" data-target="completed">Move to Completed</a></li>
+                            </ul>
+                          </div>
+                          <div class="type">Data Breach</div>
+                          <div class="reporter">Jane Smith</div>
+                          <span class="badge badge-medium">Medium</span>
+                        </div>
+
+                        <span class="load-more">+ Load More</span>
+                      </td>
+
+                      <!-- IN PROGRESS column -->
+                      <td id="col-in-progress">
+                        <div class="case-card" data-token="GHI789">
+                          <div class="card-header">
+                            <span class="token">GHI789</span>
+                            <button class="card-menu-btn">&#x22EE;</button>
+                            <ul class="card-menu">
+                              <li><a href="#" class="view-details">View Details</a></li>
+                              <li><a href="#" class="move-case" data-target="completed">Move to Completed</a></li>
+                            </ul>
+                          </div>
+                          <div class="type">Ransomware Attack</div>
+                          <div class="reporter">Alice Lee</div>
+                          <span class="badge badge-high">High</span>
+                        </div>
+                        <span class="load-more">+ Load More</span>
+                      </td>
+
+                      <!-- COMPLETED column -->
+                      <td id="col-completed">
+                        <div class="case-card" data-token="JKL012">
+                          <div class="card-header">
+                            <span class="token">JKL012</span>
+                            <button class="card-menu-btn">&#x22EE;</button>
+                            <ul class="card-menu">
+                              <li><a href="#" class="view-details">View Details</a></li>
+                              <li><a href="#" class="move-case" data-target="in-progress">Reopen (In Progress)</a></li>
+                            </ul>
+                          </div>
+                          <div class="type">Identity Theft</div>
+                          <div class="reporter">Bob Kumar</div>
+                          <span class="badge badge-low">Low</span>
+                        </div>
+                        <span class="load-more">+ Load More</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </main>
+
+              <script src="../js/main.js" defer></script>
+              <script src="../js/admin.js" defer></script>
+              <script src="../js/toast.js"></script>
+            </body>
+
+            </html>

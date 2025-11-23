@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Dashboard | CyberSafe Portal</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/toast.js"></script>
+  <script src="../js/main.js" defer></script>
+  <script src="../js/reporter.js" defer></script>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container nav-wrapper">
+      <a href="../index.html" class="logo"><i class="fas fa-shield-alt"></i> CyberSafe</a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="report-incident.html">Report Incident</a></li>
+        <li><a href="track-case.html">Track Case</a></li>
+        <li><a href="my-reports.html">My Reports</a></li>
+        <li><a href="profile.html">Profile</a></li>
+      </ul>
+      <a href="#" onclick="logout()" class="btn btn-outline">Logout</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h1>Welcome, <span id="userName">User</span></h1>
+    <p>Overview of your case statistics and quick actions.</p>
+    <!-- TODO: Insert dashboard widgets -->
+  </main>
+</body>
+
+</html>
