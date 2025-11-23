@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Crime Reporting Portal | Report & Track Cybercrime</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cyber Crime Reporting Portal | CyberSafe Portal</title>
+
+    <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <meta name="description" content="CyberSafe Portal - report cybercrime, track cases, and find official resources." />
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -21,7 +27,6 @@
                     <li><a href="#about">About</a></li>
                     <li><a href="#services">Services</a></li>
                     <li><a href="#statistics">Statistics</a></li>
-                    <li><a href="#contact">Contact</a></li>
                 </ul>
                 <div class="nav-buttons">
                     <a href="login.html" class="btn btn-outline">Login</a>
@@ -103,6 +108,40 @@
         </div>
     </section>
 
+    <!-- Services Section (moved from footer) -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="section-header">
+                <h2>Emergency Services</h2>
+                <p>Essential cyber-safety resources at your fingertips</p>
+            </div>
+
+            <div class="services-grid">
+
+                <div class="service-card">
+                    <i class="fas fa-globe"></i>
+                    <h3>Gov Cyber Website</h3>
+                    <p>Official Indian government cybercrime resources.</p>
+                    <a href="https://cybercrime.gov.in/" target="_blank" class="btn btn-light">Open</a>
+                </div>
+
+                <div class="service-card">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>File FIR Online</h3>
+                    <p>Register FIRs via official digital channels.</p>
+                    <a href="https://digitalpolice.gov.in/" target="_blank" class="btn btn-light">File Now</a>
+                </div>
+
+                <div class="service-card">
+                    <i class="fas fa-shield-virus"></i>
+                    <h3>Safety Guidelines</h3>
+                    <p>Best practices & safety tips from official sources.</p>
+                    <a href="https://cybercrime.gov.in/Webform/Crime_OnlineSafetyTips.aspx" target="_blank" class="btn btn-light">View</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Statistics Section -->
     <section class="statistics" id="statistics">
         <div class="container">
@@ -113,63 +152,53 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <i class="fas fa-users"></i>
-                    <h3 class="counter" data-target="15420">0</h3>
+                    <h3 class="counter" data-target="0">0</h3>
                     <p>Registered Users</p>
                 </div>
                 <div class="stat-card">
                     <i class="fas fa-file-alt"></i>
-                    <h3 class="counter" data-target="8754">0</h3>
+                    <h3 class="counter" data-target="0">0</h3>
                     <p>Cases Reported</p>
                 </div>
                 <div class="stat-card">
                     <i class="fas fa-check-circle"></i>
-                    <h3 class="counter" data-target="6892">0</h3>
+                    <h3 class="counter" data-target="0">0</h3>
                     <p>Cases Resolved</p>
                 </div>
                 <div class="stat-card">
                     <i class="fas fa-clock"></i>
-                    <h3><span class="counter" data-target="48">0</span>hrs</h3>
+                    <h3><span class="counter" data-target="0">0</span>hrs</h3>
                     <p>Avg Response Time</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- Footer (compact) -->
     <footer class="footer">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <div class="logo">
+            <div class="footer-content-compact">
+                <div class="footer-brand">
+                    <div class="logo-inline">
                         <i class="fas fa-shield-alt"></i>
                         <span>CyberSafe Portal</span>
                     </div>
-                    <p>A initiative to combat cybercrime and ensure digital safety for all citizens.</p>
+                    <p class="muted">An initiative to combat cybercrime and ensure digital safety for all citizens.</p>
                 </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
+                    <ul>                      
+                        <h4>Quick Links</h4>
                         <li><a href="#about">About Us</a></li>
                         <li><a href="#services">Services</a></li>
                         <li><a href="login.html">Report Crime</a></li>
                         <li><a href="login.html">Track Case</a></li>
                     </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Emergency</h4>
-                    <ul>
-                        <li><a href="https://www.cybercrime.gov.in/">Gov cyber website</a></li>
-                        <li><a href="https://digitalpolice.gov.in/">File FIR Online</a></li>
-                        <li><a href="https://cybercrime.gov.in/Webform/Crime_OnlineSafetyTips.aspx">Safety Guidelines</a></li>
-                    </ul>
-                </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 CyberSafe Portal. All rights reserved. | Designed for public safety and digital security.</p>
+
+            <div class="footer-bottom-compact">
+                <p>&copy; 2025 CyberSafe Portal. All rights reserved.</p>
             </div>
         </div>
     </footer>
-<!-- Footer End -->
 
     <script src="js/main.js"></script>
 </body>
