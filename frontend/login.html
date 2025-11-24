@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +8,6 @@
     <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body class="auth-body">
     <!-- Back to Home Button -->
     <a href="index.html" class="back-home">
@@ -64,8 +62,7 @@
                                 <i class="fas fa-lock"></i> Password
                             </label>
                             <div class="password-input">
-                                <input type="password" id="password" name="password" placeholder="Enter your password"
-                                    required>
+                                <input type="password" id="password" name="password" placeholder="Enter your password" required>
                                 <span class="toggle-password" id="togglePassword">
                                     <i class="fas fa-eye"></i>
                                 </span>
@@ -85,16 +82,6 @@
                             <i class="fas fa-sign-in-alt"></i> Login
                         </button>
 
-                        <div class="divider">
-                            <span>OR</span>
-                        </div>
-
-                        <div class="social-login">
-                            <button type="button" class="btn btn-social btn-google">
-                                <i class="fab fa-google"></i> Login with Google
-                            </button>
-                        </div>
-
                         <div class="auth-footer">
                             <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
                         </div>
@@ -110,11 +97,11 @@
                     </div>
                     <h2>Secure Access</h2>
                     <p>Your data is protected with industry-standard encryption and security protocols.</p>
-
+                    
                     <div class="info-features">
                         <div class="info-feature">
                             <i class="fas fa-check-circle"></i>
-                            <span>End-to-end encryption</span>
+                            <span>Report and Track cases easily</span>
                         </div>
                         <div class="info-feature">
                             <i class="fas fa-check-circle"></i>
@@ -122,32 +109,44 @@
                         </div>
                         <div class="info-feature">
                             <i class="fas fa-check-circle"></i>
-                            <span>Privacy guaranteed</span>
+                            <span>Fast Response within 48 hours</span>
+                        </div>
+                    </div>
+                <!-- Process Steps -->
+                    <div class="info-stats">
+                        <div class="stat">
+                            <div class="step-number" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">1</div>
+                            <div style="margin-top: 12px;">
+                                <i class="fas fa-file-alt" style="font-size: 1.8rem; color: #667eea; margin-bottom: 8px; display: block;"></i>
+                                <p style="font-weight: 600; font-size: 1rem; margin: 0;">Report Crime</p>
+                                <p style="font-size: 0.75rem; color: rgba(255,255,255,0.7); margin-top: 4px;">Submit your case securely</p>
+                            </div>
+                        </div>
+                        <div class="stat">
+                            <div class="step-number" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);">2</div>
+                            <div style="margin-top: 12px;">
+                                <i class="fas fa-chart-line" style="font-size: 1.8rem; color: #f093fb; margin-bottom: 8px; display: block;"></i>
+                                <p style="font-weight: 600; font-size: 1rem; margin: 0;">Track Status</p>
+                                <p style="font-size: 0.75rem; color: rgba(255,255,255,0.7); margin-top: 4px;">Monitor case progress</p>
+                            </div>
+                        </div>
+                        <div class="stat">
+                            <div class="step-number" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);">3</div>
+                            <div style="margin-top: 12px;">
+                                <i class="fas fa-check-circle" style="font-size: 1.8rem; color: #4facfe; margin-bottom: 8px; display: block;"></i>
+                                <p style="font-weight: 600; font-size: 1rem; margin: 0;">Get Resolution</p>
+                                <p style="font-size: 0.75rem; color: rgba(255,255,255,0.7); margin-top: 4px;">Receive timely updates</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="info-stats">
-                        <div class="stat">
-                            <h3>15K+</h3>
-                            <p>Active Users</p>
-                        </div>
-                        <div class="stat">
-                            <h3>8K+</h3>
-                            <p>Cases Resolved</p>
-                        </div>
-                        <div class="stat">
-                            <h3>99%</h3>
-                            <p>Success Rate</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <script src="js/toast.js"></script>
-    <script src="js/auth.js"></script>
+    <!-- Toast Notification --> 
+     <script src="js/toast.js"></script> 
+     <script src="js/auth.js"></script>
 </body>
-
 </html>

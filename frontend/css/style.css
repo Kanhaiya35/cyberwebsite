@@ -398,6 +398,42 @@ section {
     font-size: 100px;
 }
 
+/* ==================== SERVICES SECTION ==================== */
+.services {
+    background-color: white;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.service-card {
+    background: linear-gradient(15deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 45px;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.service-card i {
+    font-size: 50px;
+    color: white;
+    margin-bottom: 15px;
+}
+
+.service-card h3 {
+    margin-bottom: 15px;
+    color: whitesmoke;
+}
 
 /* ==================== STATISTICS SECTION ==================== */
 .statistics {
@@ -442,128 +478,66 @@ section {
     opacity: 0.9;
 }
 
-
-/* ==================== FOOTER ==================== */
+/* ==================== FOOTER (COMPACT) ==================== */
 .footer {
     background-color: var(--bg-dark);
     color: white;
-    padding: 60px 0 20px;
+    padding: 40px 0 20px;
 }
 
-.footer-content {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 40px;
-    margin-bottom: 40px;
-}
-
-.footer-section h4 {
-    font-size: 20px;
-    margin-bottom: 20px;
-}
-
-.footer-section p {
-    color: var(--text-light);
-    margin-bottom: 20px;
-    line-height: 1.8;
-}
-
-.footer-section ul li {
-    margin-bottom: 12px;
-}
-
-.footer-section ul li a {
-    color: var(--text-light);
-    transition: var(--transition);
-}
-
-.footer-section ul li a:hover {
-    color: var(--primary-light);
-    padding-left: 5px;
-}
-
-.social-links {
+.footer-content-compact {
     display: flex;
-    gap: 15px;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 14px;
 }
 
-.social-links a {
-    width: 40px;
-    height: 40px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
+.logo-inline {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 10px;
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+}
+
+.logo-inline i {
+    font-size: 26px;
+}
+
+.footer-brand p,
+.muted {
+    color: var(--text-light);
+    margin-top: 8px;
+    max-width: 420px;
+    line-height: 1.6;
+}
+
+.footer-links-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.footer-links-compact a {
+    color: var(--text-light);
     transition: var(--transition);
 }
 
-.social-links a:hover {
-    background-color: var(--primary-color);
-    transform: translateY(-3px);
+.footer-links-compact a:hover {
+    color: var(--primary-light);
+    padding-left: 6px;
 }
 
-.footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 20px;
+.footer-bottom-compact {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 12px;
     text-align: center;
     color: var(--text-light);
 }
 
-/* ==================== RESPONSIVE DESIGN ==================== */
-@media (max-width: 1024px) {
-
-    .hero-content,
-    .about-content,
-    .contact-content {
-        grid-template-columns: 1fr;
-    }
-
-    .services-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .footer-content {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-
-    .nav-links,
-    .nav-buttons {
-        display: none;
-    }
-
-    .mobile-menu-icon {
-        display: block;
-    }
-
-    .hero-text h1 {
-        font-size: 36px;
-    }
-
-    .hero-buttons {
-        flex-direction: column;
-    }
-
-    .services-grid,
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .section-header h2 {
-        font-size: 32px;
-    }
-
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
+/* ==================== DASHBOARD / CARDS / FORM STYLES (restored) ==================== */
 .dashboard-card {
     background: white;
     border-radius: var(--border-radius-lg);
@@ -647,24 +621,7 @@ section {
     border-color: var(--primary-light);
 }
 
-.report-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--bg-secondary);
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-}
-
-.report-id {
-    font-family: monospace;
-    font-weight: 700;
-    color: var(--primary-color);
-    background: var(--bg-secondary);
-    padding: 4px 8px;
-    border-radius: 4px;
-}
-
+/* Badges */
 .badge {
     padding: 6px 12px;
     border-radius: 20px;
@@ -696,16 +653,6 @@ section {
 .badge-withdrawn {
     background-color: #6b7280;
     color: white;
-}
-
-@media (max-width: 768px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .dashboard-card {
-        padding: 20px;
-    }
 }
 
 /* ==================== TOAST NOTIFICATIONS ==================== */
@@ -756,16 +703,59 @@ section {
     font-size: 20px;
 }
 
-@media (max-width: 768px) {
-    #toast-container {
-        top: auto;
-        bottom: 20px;
-        left: 20px;
-        right: 20px;
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 1024px) {
+
+    .hero-content,
+    .about-content,
+    .contact-content {
+        grid-template-columns: 1fr;
     }
 
-    .toast {
-        width: 100%;
-        min-width: auto;
+    .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .footer-content-compact {
+        flex-direction: column;
+        gap: 20px;
     }
 }
+
+@media (max-width: 768px) {
+
+    .nav-links,
+    .nav-buttons {
+        display: none;
+    }
+
+    .mobile-menu-icon {
+        display: block;
+    }
+
+    .hero-text h1 {
+        font-size: 36px;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+    }
+
+    .services-grid,
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header h2 {
+        font-size: 32px;
+    }
+
+}
+
+/* small utilities */
+.text-muted { color: var(--text-light); font-size: 14px; }
+.center { text-align: center; }
