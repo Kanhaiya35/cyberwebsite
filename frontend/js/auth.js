@@ -5,7 +5,7 @@ const API_URL = 'http://localhost:5000/api';
 const togglePassword = document.getElementById('togglePassword');
 const passwordInput = document.getElementById('password');
 
-if (togglePassword) {
+if (togglePassword && passwordInput) {
     togglePassword.addEventListener('click', () => {
         const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordInput.setAttribute('type', type);
@@ -23,7 +23,7 @@ if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.trim().toLowerCase();
         const password = document.getElementById('password').value;
         const roleRadio = document.querySelector('input[name="role"]:checked');
         
@@ -31,13 +31,14 @@ if (loginForm) {
             showToast('Please select a role (User or Admin)', 'error');
             return;
         }
-        
+
         const role = roleRadio.value;
 
         // Clear errors
         document.getElementById('emailError').textContent = '';
         document.getElementById('passwordError').textContent = '';
 
+        // Button loading state
         const submitBtn = loginForm.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
@@ -45,27 +46,28 @@ if (loginForm) {
 
         try {
             const endpoint = role === 'admin' ? '/admin/login' : '/reporters/login';
-            // Fixed: Removed extra space in URL
+
             const response = await fetch(`${API_URL}${endpoint}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ email, password })
             });
 
-            let data;
+            let data = {};
             try {
                 data = await response.json();
             } catch (e) {
-                throw new Error('Invalid response from server');
+                throw new Error('Invalid server response');
             }
 
             if (response.ok) {
-                // Save user info only (token is in cookie)
+                // Store user info
                 localStorage.setItem('user', JSON.stringify(data));
                 localStorage.setItem('role', role);
+
+                // Prevent immediate re-check
+                sessionStorage.setItem('justLoggedIn', 'true');
 
                 showToast('Login successful!', 'success');
 
@@ -76,6 +78,7 @@ if (loginForm) {
                         window.location.href = 'user/dashboard.html';
                     }
                 }, 1000);
+
             } else {
                 throw new Error(data.message || 'Login failed');
             }
@@ -96,27 +99,30 @@ if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const phone = document.getElementById('phone').value;
-        const address = document.getElementById('address').value;
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const phone = document.getElementById('phone').value.trim();
+        const address = document.getElementById('address').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
         const profilePhoto = document.getElementById('profilePhoto').files[0];
 
+        const passwordError = document.getElementById('passwordError');
+        passwordError.textContent = '';
+
+        // Validations
         if (password.length < 6) {
-            document.getElementById('passwordError').textContent = 'Password must be at least 6 characters';
+            passwordError.textContent = 'Password must be at least 6 characters';
             return;
         }
 
         if (password !== confirmPassword) {
-            document.getElementById('passwordError').textContent = 'Passwords do not match';
+            passwordError.textContent = 'Passwords do not match';
             return;
         }
 
-        // Validate file size if provided
         if (profilePhoto && profilePhoto.size > 5 * 1024 * 1024) {
-            document.getElementById('passwordError').textContent = 'Profile photo must be less than 5MB';
+            passwordError.textContent = 'Profile photo must be less than 5MB';
             return;
         }
 
@@ -140,11 +146,11 @@ if (signupForm) {
                 body: formData
             });
 
-            let data;
+            let data = {};
             try {
                 data = await response.json();
             } catch (e) {
-                throw new Error('Invalid response from server');
+                throw new Error('Invalid server response');
             }
 
             if (response.ok) {
@@ -164,7 +170,7 @@ if (signupForm) {
             }
         } catch (error) {
             showToast(error.message, 'error');
-            document.getElementById('passwordError').textContent = error.message;
+            passwordError.textContent = error.message;
         } finally {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
@@ -172,10 +178,7 @@ if (signupForm) {
     });
 }
 
-// ==================== UTILS ====================
-// Toast handled by toast.js
-
-// Role Selection Highlight
+// ==================== ROLE UI HIGHLIGHT ====================
 const roleOptions = document.querySelectorAll('.role-option');
 roleOptions.forEach(option => {
     option.addEventListener('click', () => {

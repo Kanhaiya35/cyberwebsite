@@ -1,128 +1,93 @@
 const API_URL = 'http://localhost:5000/api';
 
-// Check if user is logged in (using localStorage for UI state, but cookies for auth)
+// Load user from localStorage
 let user = null;
 try {
     const userStr = localStorage.getItem('user');
-    if (userStr) {
-        user = JSON.parse(userStr);
-    }
+    if (userStr) user = JSON.parse(userStr);
 } catch (e) {
-    console.error('Error parsing user from localStorage:', e);
+    console.error('Error parsing user:', e);
 }
 
-// Verify authentication with server before redirecting
+// ============================ AUTH CHECK ============================
 async function checkAdminAuth() {
     const role = localStorage.getItem('role');
+
     if (!user || role !== 'admin') {
         window.location.href = '../login.html';
         return false;
     }
-    
+
     try {
         const response = await fetch(`${API_URL}/admin/profile`, {
-            credentials: 'include',
-            method: 'GET'
+            credentials: 'include'
         });
-        
-        if (!response.ok && response.status === 401) {
-            // Token expired or invalid
+
+        if (response.status === 401) {
             localStorage.removeItem('user');
             localStorage.removeItem('role');
             window.location.href = '../login.html';
             return false;
         }
+
         return true;
     } catch (error) {
-        console.error('Auth check failed:', error);
-        // Don't redirect on network errors, let the page load
+        console.warn("Auth check failed:", error);
         return true;
     }
 }
 
-// Verify authentication asynchronously (don't block page load)
-// Add delay to ensure cookies are set after login redirect
-setTimeout(async () => {
-    const role = localStorage.getItem('role');
-    if (!user || role !== 'admin') {
-        // No user or not admin, redirect immediately
-        window.location.href = '../login.html';
-        return;
-    }
-    
-    // Verify token is still valid with server
-    try {
-        const response = await fetch(`${API_URL}/admin/profile`, {
-            credentials: 'include',
-            method: 'GET'
-        });
-        
-        if (!response.ok) {
-            if (response.status === 401) {
-                // Only redirect on clear 401 Unauthorized
-                try {
-                    const errorData = await response.json();
-                    console.error('Admin auth failed:', errorData.message || 'Unauthorized');
-                } catch (e) {
-                    console.error('Admin auth failed: Unauthorized');
-                }
-                localStorage.removeItem('user');
-                localStorage.removeItem('role');
-                window.location.href = '../login.html';
-            } else {
-                // Other errors (500, 404, etc.) - don't redirect, just log
-                console.warn('Admin profile check returned status:', response.status);
-            }
-        }
-    } catch (error) {
-        // Network error - don't redirect, let the page load
-        // This could be a temporary network issue
-        console.warn('Auth verification network error (non-critical):', error.message);
-    }
-}, 1000); // 1 second delay to ensure cookies are fully set after redirect
+// Immediate check
+checkAdminAuth();
 
-// Logout Function
-window.logout = function () {
+// ============================ LOGOUT ============================
+window.logout = async function () {
+    try {
+        await fetch(`${API_URL}/admin/logout`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+    } catch (e) {
+        console.warn("Logout request failed:", e);
+    }
+
     localStorage.removeItem('user');
     localStorage.removeItem('role');
+
     showToast('Logged out successfully', 'success');
+
     setTimeout(() => {
         window.location.href = '../login.html';
-    }, 1000);
+    }, 800);
 };
 
-// ==================== ADMIN DASHBOARD ====================
+// ============================ DASHBOARD ============================
 async function loadDashboard() {
     try {
         const response = await fetch(`${API_URL}/reports`, {
             credentials: 'include'
         });
-        
-        if (!response.ok) {
-            if (response.status === 401) {
-                window.location.href = '../login.html';
-                return;
-            }
-            throw new Error('Failed to load reports');
+
+        if (response.status === 401) {
+            window.location.href = '../login.html';
+            return;
         }
-        
+
         const reports = await response.json();
 
         const newCol = document.getElementById('col-new');
         const progressCol = document.getElementById('col-in-progress');
         const completedCol = document.getElementById('col-completed');
 
-        // Clear existing
         newCol.innerHTML = '<h3>New / Pending</h3>';
         progressCol.innerHTML = '<h3>In Progress</h3>';
         completedCol.innerHTML = '<h3>Completed</h3>';
 
         reports.forEach(report => {
             const card = createCaseCard(report);
-            const isWithdrawn = report.withdrawn || report.status === 'Withdrawn';
+            const withdrawn = report.withdrawn || report.status === 'Withdrawn';
 
-            // Show withdrawn reports in completed column with special styling
-            if (isWithdrawn) {
+            if (withdrawn) {
                 card.style.opacity = '0.6';
                 card.style.borderLeft = '4px solid #6b7280';
                 completedCol.appendChild(card);
@@ -136,29 +101,35 @@ async function loadDashboard() {
         });
 
     } catch (error) {
-        console.error('Error loading dashboard:', error);
-        showToast('Failed to load dashboard. Please try again.', 'error');
+        console.error('Dashboard load error:', error);
+        showToast('Failed to load dashboard', 'error');
     }
 }
 
+// Create Kanban card
 function createCaseCard(report) {
     const div = document.createElement('div');
     div.className = 'case-card';
     div.setAttribute('data-id', report._id);
 
-    const isWithdrawn = report.withdrawn || report.status === 'Withdrawn';
-    
+    const withdrawn = report.withdrawn || report.status === 'Withdrawn';
+
     div.innerHTML = `
         <div class="card-header">
             <span class="token">${report.trackingId}</span>
             <div class="actions">
-                ${isWithdrawn ? '<span class="badge badge-withdrawn">Withdrawn</span>' : `
-                <select onchange="updateStatus('${report._id}', this.value)">
-                    <option value="Pending" ${report.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                    <option value="In Progress" ${report.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                    <option value="Resolved" ${report.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
-                </select>
-                `}
+                ${
+                    withdrawn
+                    ? `<span class="badge badge-withdrawn">Withdrawn</span>`
+                    : `
+                        <select onchange="updateStatus('${report._id}', this.value)">
+                            <option value="Pending" ${report.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="In Progress" ${report.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                            <option value="Resolved" ${report.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                            <option value="Closed" ${report.status === 'Closed' ? 'selected' : ''}>Closed</option>
+                        </select>
+                    `
+                }
             </div>
         </div>
         <div class="type">${report.type}</div>
@@ -169,141 +140,123 @@ function createCaseCard(report) {
     return div;
 }
 
+// Update status
 async function updateStatus(id, status) {
     try {
         const response = await fetch(`${API_URL}/reports/${id}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ status })
         });
 
         if (response.ok) {
-            loadDashboard(); // Reload to move card
-            showToast('Status updated successfully', 'success');
+            loadDashboard();
+            showToast('Status updated', 'success');
         } else {
-            showToast('Failed to update status', 'error');
+            showToast('Update failed', 'error');
         }
     } catch (error) {
-        console.error(error);
+        console.error('Update error:', error);
     }
 }
 
-// Initial Load
-if (document.querySelector('.kanban-table')) {
-    loadDashboard();
-}
+// Load dashboard if page contains kanban table
+if (document.querySelector('.kanban-table')) loadDashboard();
 
-// ==================== ADMIN PROFILE MANAGEMENT ====================
+// ========================== ADMIN PROFILE ==========================
 const adminProfileForm = document.getElementById('adminProfileForm');
 
 if (adminProfileForm) {
-    // Load Profile Data
+    // Load profile
     async function loadAdminProfile() {
         try {
             const response = await fetch(`${API_URL}/admin/profile`, {
                 credentials: 'include'
             });
-            
-            if (!response.ok) {
-                if (response.status === 401) {
-                    // Clear invalid session
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('role');
-                    // Only redirect if we're on a protected page
-                    if (window.location.pathname.includes('profile.html') || 
-                        window.location.pathname.includes('dashboard.html')) {
-                        window.location.href = '../login.html';
-                    }
-                    return;
-                }
-                throw new Error('Failed to load profile');
+
+            if (response.status === 401) {
+                localStorage.removeItem('user');
+                localStorage.removeItem('role');
+                window.location.href = '../login.html';
+                return;
             }
-            
-            let data;
+
+            let data = {};
             try {
                 data = await response.json();
             } catch (e) {
-                throw new Error('Invalid response from server');
+                console.warn("Invalid JSON");
             }
 
-            if (response.ok) {
-                document.getElementById('name').value = data.name || '';
-                document.getElementById('email').value = data.email || '';
-                document.getElementById('phone').value = data.phone || '';
-                document.getElementById('address').value = data.address || '';
-                
-                // Handle profile photo
-                const photoPreview = document.getElementById('profilePhotoPreview');
-                const photoPlaceholder = document.getElementById('profilePhotoPlaceholder');
-                if (data.profilePhoto) {
-                    photoPreview.src = `http://localhost:5000/${data.profilePhoto}`;
-                    photoPreview.style.display = 'block';
-                    photoPlaceholder.style.display = 'none';
-                } else {
-                    photoPreview.style.display = 'none';
-                    photoPlaceholder.style.display = 'flex';
-                }
+            document.getElementById('name').value = data.name || '';
+            document.getElementById('email').value = data.email || '';
+            document.getElementById('phone').value = data.phone || '';
+            document.getElementById('address').value = data.address || '';
+
+            // Profile photo
+            const preview = document.getElementById('profilePhotoPreview');
+            const placeholder = document.getElementById('profilePhotoPlaceholder');
+
+            if (data.profilePhoto) {
+                preview.src = `http://localhost:5000/${data.profilePhoto.replace(/\\/g, '/')}`;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                preview.style.display = 'none';
+                placeholder.style.display = 'flex';
             }
+
         } catch (error) {
-            console.error('Error loading profile:', error);
+            console.error('Profile load error:', error);
         }
     }
+
     loadAdminProfile();
 
-    // Profile photo preview
-    const profilePhotoInput = document.getElementById('profilePhoto');
-    if (profilePhotoInput) {
-        profilePhotoInput.addEventListener('change', function(e) {
+    // Photo preview
+    const photoInput = document.getElementById('profilePhoto');
+    if (photoInput) {
+        photoInput.addEventListener('change', function (e) {
             const file = e.target.files[0];
-            if (file) {
-                if (file.size > 5 * 1024 * 1024) {
-                    showToast('File size must be less than 5MB', 'error');
-                    e.target.value = '';
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const photoPreview = document.getElementById('profilePhotoPreview');
-                    const photoPlaceholder = document.getElementById('profilePhotoPlaceholder');
-                    photoPreview.src = e.target.result;
-                    photoPreview.style.display = 'block';
-                    photoPlaceholder.style.display = 'none';
-                };
-                reader.readAsDataURL(file);
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Max 5MB allowed', 'error');
+                e.target.value = '';
+                return;
             }
+
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                const preview = document.getElementById('profilePhotoPreview');
+                const placeholder = document.getElementById('profilePhotoPlaceholder');
+                preview.src = ev.target.result;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
         });
     }
 
-    // Update Profile
+    // Submit profile update
     let isSubmitting = false;
     adminProfileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        // Prevent multiple submissions
-        if (isSubmitting) {
-            return;
-        }
-
-        const name = document.getElementById('name').value;
-        const phone = document.getElementById('phone').value;
-        const address = document.getElementById('address').value;
-        const profilePhoto = document.getElementById('profilePhoto').files[0];
+        if (isSubmitting) return;
 
         const formData = new FormData();
-        formData.append('name', name);
-        formData.append('phone', phone);
-        formData.append('address', address);
-        if (profilePhoto) {
-            formData.append('profilePhoto', profilePhoto);
-        }
+        formData.append('name', document.getElementById('name').value);
+        formData.append('phone', document.getElementById('phone').value);
+        formData.append('address', document.getElementById('address').value);
 
-        const submitBtn = adminProfileForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        submitBtn.disabled = true;
+        const file = document.getElementById('profilePhoto').files[0];
+        if (file) formData.append('profilePhoto', file);
+
+        const btn = adminProfileForm.querySelector('button[type="submit"]');
+        const oldText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        btn.disabled = true;
         isSubmitting = true;
 
         try {
@@ -313,48 +266,26 @@ if (adminProfileForm) {
                 body: formData
             });
 
-            let data;
+            let data = {};
             try {
                 data = await response.json();
-            } catch (e) {
-                throw new Error('Invalid response from server');
-            }
+            } catch (e) {}
 
             if (response.ok) {
-                showToast('Profile updated successfully!', 'success');
-                
-                // Update profile photo preview if a new photo was uploaded
-                if (profilePhoto) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const photoPreview = document.getElementById('profilePhotoPreview');
-                        const photoPlaceholder = document.getElementById('profilePhotoPlaceholder');
-                        photoPreview.src = e.target.result;
-                        photoPreview.style.display = 'block';
-                        photoPlaceholder.style.display = 'none';
-                    };
-                    reader.readAsDataURL(profilePhoto);
-                }
-                
-                // Clear file input
-                document.getElementById('profilePhoto').value = '';
-                
-                // Prevent form resubmission warning
-                if (window.history.replaceState) {
-                    window.history.replaceState(null, '', window.location.href);
-                }
-                
-                // Reload profile data from server to get updated photo URL
-                await loadAdminProfile();
+                showToast('Profile updated!', 'success');
+                loadAdminProfile();
             } else {
-                throw new Error(data.message || 'Update failed');
+                showToast(data.message || 'Update failed', 'error');
             }
+
         } catch (error) {
-            showToast(error.message, 'error');
+            console.error('Update error:', error);
+            showToast('Update failed', 'error');
         } finally {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
+            btn.innerHTML = oldText;
+            btn.disabled = false;
             isSubmitting = false;
+            document.getElementById('profilePhoto').value = '';
         }
     });
 }

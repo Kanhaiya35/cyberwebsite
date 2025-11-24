@@ -3,95 +3,97 @@ const bcrypt = require('bcryptjs');
 const asyncHandler = require('express-async-handler');
 const Admin = require('../models/adminModel');
 
-// @desc    Authenticate admin
-// @route   POST /api/admin/login
-// @access  Public
+// LOGIN ADMIN
 const loginAdmin = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
-    // Check for admin email
+    if (!email || !password) {
+        res.status(400);
+        throw new Error('Please enter both email and password');
+    }
+
+    email = email.trim().toLowerCase();
     const admin = await Admin.findOne({ email });
 
-    if (admin && (await bcrypt.compare(password, admin.password))) {
-        const token = generateToken(admin._id);
-
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-            path: '/'
-        });
-
-        res.json({
-            _id: admin.id,
-            email: admin.email,
-            name: admin.name || 'Admin'
-        });
-    } else {
+    if (!admin || !(await bcrypt.compare(password, admin.password))) {
         res.status(400);
         throw new Error('Invalid credentials');
     }
+
+    const token = generateToken(admin._id);
+
+    // FINAL COOKIE SETTINGS THAT WORK ON LOCALHOST
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: false,      // localhost ONLY
+        sameSite: "lax",    // cross-port allowed
+        path: "/",
+        maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+
+    res.json({
+        _id: admin.id,
+        email: admin.email,
+        name: admin.name || "Admin",
+    });
 });
 
-// Generate JWT
-const generateToken = (id) => {
-    if (!process.env.JWT_SECRET) {
-        throw new Error('JWT_SECRET is not configured. Please set it in your .env file.');
-    }
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '30d',
-    });
-};
-
-// @desc    Get admin data
-// @route   GET /api/admin/profile
-// @access  Private (Admin)
+// GET ADMIN PROFILE
 const getMe = asyncHandler(async (req, res) => {
-    const admin = await Admin.findById(req.admin.id).select('-password');
+    const admin = await Admin.findById(req.admin.id).select("-password");
 
     if (!admin) {
         res.status(404);
         throw new Error('Admin not found');
     }
 
-    res.status(200).json({
-        id: admin._id,
-        name: admin.name || 'Admin',
-        email: admin.email,
-        phone: admin.phone || '',
-        address: admin.address || '',
-        profilePhoto: admin.profilePhoto || ''
-    });
+    res.status(200).json(admin);
 });
 
-// @desc    Update admin profile
-// @route   PUT /api/admin/profile
-// @access  Private (Admin)
+// UPDATE PROFILE
 const updateProfile = asyncHandler(async (req, res) => {
     const admin = await Admin.findById(req.admin.id);
-
     if (!admin) {
-        res.status(401);
+        res.status(404);
         throw new Error('Admin not found');
     }
 
-    const updateData = { ...req.body };
-    
-    // Handle profile photo upload if provided
-    if (req.file) {
-        updateData.profilePhoto = req.file.path;
-    }
+    const updateData = {
+        name: req.body.name,
+        phone: req.body.phone,
+        address: req.body.address
+    };
+
+    if (req.file) updateData.profilePhoto = req.file.path;
 
     const updatedAdmin = await Admin.findByIdAndUpdate(req.admin.id, updateData, {
         new: true,
-    }).select('-password');
+    }).select("-password");
 
     res.status(200).json(updatedAdmin);
 });
 
+// LOGOUT ADMIN
+const logoutAdmin = (req, res) => {
+    res.cookie("token", "", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        expires: new Date(0),
+        path: "/"
+    });
+
+    res.json({ message: "Logged out successfully" });
+};
+
+// TOKEN GENERATOR
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+};
+
 module.exports = {
     loginAdmin,
     getMe,
-    updateProfile
+    updateProfile,
+    logoutAdmin,
 };

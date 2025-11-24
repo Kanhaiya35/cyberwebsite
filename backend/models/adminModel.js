@@ -4,7 +4,9 @@ const adminSchema = mongoose.Schema({
     email: {
         type: String,
         required: [true, 'Please add an email'],
-        unique: true
+        unique: true,
+        trim: true,
+        lowercase: true
     },
     password: {
         type: String,
@@ -12,7 +14,8 @@ const adminSchema = mongoose.Schema({
     },
     name: {
         type: String,
-        default: 'Admin'
+        default: 'Admin',
+        trim: true
     },
     phone: {
         type: String,
@@ -25,6 +28,10 @@ const adminSchema = mongoose.Schema({
     profilePhoto: {
         type: String, // Path to uploaded file
         default: ''
+    },
+    role: {
+        type: String,
+        default: 'admin'
     }
 }, {
     timestamps: true

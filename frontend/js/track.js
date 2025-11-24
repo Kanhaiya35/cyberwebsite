@@ -7,41 +7,66 @@ if (trackForm) {
         e.preventDefault();
 
         const input = trackForm.querySelector('input');
-        const trackingId = input.value.trim();
+        const trackingId = input.value.trim().toUpperCase();
         const btn = trackForm.querySelector('button');
 
-        if (!trackingId) return;
+        // Basic validation
+        if (!trackingId) {
+            showToast("Please enter a tracking ID", "error");
+            return;
+        }
 
-        btn.textContent = 'Searching...';
+        // Optional: format check (CYB-YYYYMMDD-XXXX)
+        const pattern = /^CYB-\d{8}-\d{4}$/;
+        if (!pattern.test(trackingId)) {
+            showToast("Invalid Tracking ID format", "warning");
+        }
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
         btn.disabled = true;
 
         try {
             const response = await fetch(`${API_URL}/reports/track/${trackingId}`);
-            
+
             let data;
             try {
                 data = await response.json();
             } catch (e) {
-                throw new Error('Invalid response from server');
+                throw new Error("Invalid server response");
             }
 
+            const resultBox = document.getElementById('trackResult');
+
             if (response.ok) {
-                document.getElementById('trackResult').style.display = 'block';
+                // Show result box
+                resultBox.style.display = "block";
+
+                // Fill data
                 document.getElementById('statusBadge').textContent = data.status;
-                document.getElementById('statusBadge').className = `badge badge-${data.status.toLowerCase().replace(' ', '-')}`;
+                document.getElementById('statusBadge').className =
+                    `badge badge-${data.status.toLowerCase().replace(' ', '-')}`;
+
                 document.getElementById('resultId').textContent = data.trackingId;
                 document.getElementById('resultType').textContent = data.type;
-                document.getElementById('resultDate').textContent = new Date(data.date).toLocaleDateString();
-                document.getElementById('resultUpdated').textContent = new Date(data.updatedAt).toLocaleDateString();
+                document.getElementById('resultDate').textContent =
+                    new Date(data.date).toLocaleDateString();
+
+                document.getElementById('resultUpdated').textContent =
+                    new Date(data.updatedAt).toLocaleDateString();
+
+                // Auto-scroll to result
+                resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+
             } else {
-                alert('Report not found. Please check the ID.');
-                document.getElementById('trackResult').style.display = 'none';
+                showToast("Report not found. Please check the Tracking ID.", "error");
+                resultBox.style.display = "none";
             }
+
         } catch (error) {
             console.error(error);
-            alert('Error tracking case');
+            showToast("Something went wrong while tracking the case.", "error");
         } finally {
-            btn.textContent = 'Track';
+            btn.innerHTML = 'Track';
             btn.disabled = false;
         }
     });

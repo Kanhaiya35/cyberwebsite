@@ -15,19 +15,15 @@ const registerReporter = asyncHandler(async (req, res) => {
         throw new Error('Please add all required fields');
     }
 
-    // Check if reporter exists
     const reporterExists = await Reporter.findOne({ email });
-
     if (reporterExists) {
         res.status(400);
         throw new Error('User already exists');
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create reporter
     const reporter = await Reporter.create({
         name,
         email,
@@ -40,13 +36,17 @@ const registerReporter = asyncHandler(async (req, res) => {
     if (reporter) {
         const token = generateToken(reporter._id);
 
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-            path: '/'
-        });
+     const isProduction = process.env.NODE_ENV === 'production';
+
+res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,          // ✅ must be true when SameSite = 'none' (localhost is treated as secure)
+    sameSite: "lax",      // ✅ needed because frontend is on different origin (port 5500)
+    path: "/",
+    maxAge: 30 * 24 * 60 * 60 * 1000
+});
+
+
 
         res.status(201).json({
             _id: reporter.id,
@@ -65,19 +65,22 @@ const registerReporter = asyncHandler(async (req, res) => {
 const loginReporter = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
-    // Check for reporter email
     const reporter = await Reporter.findOne({ email });
 
     if (reporter && (await bcrypt.compare(password, reporter.password))) {
         const token = generateToken(reporter._id);
 
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-            path: '/'
-        });
+      const isProduction = process.env.NODE_ENV === 'production';
+
+res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,          // ✅ must be true when SameSite = 'none' (localhost is treated as secure)
+    sameSite: "lax",      // ✅ needed because frontend is on different origin (port 5500)
+    path: "/",
+    maxAge: 30 * 24 * 60 * 60 * 1000
+});
+
+
 
         res.json({
             _id: reporter.id,
@@ -123,8 +126,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     }
 
     const updateData = { ...req.body };
-    
-    // Handle profile photo upload if provided
+
     if (req.file) {
         updateData.profilePhoto = req.file.path;
     }
@@ -135,6 +137,17 @@ const updateProfile = asyncHandler(async (req, res) => {
 
     res.status(200).json(updatedReporter);
 });
+
+// @desc    Logout reporter
+// @route   POST /api/reporters/logout
+// @access  Public
+const logoutReporter = (req, res) => {
+    res.cookie('token', '', {
+        httpOnly: true,
+        expires: new Date(0),
+    });
+    res.json({ message: 'Logged out successfully' });
+};
 
 // Generate JWT
 const generateToken = (id) => {
@@ -150,5 +163,6 @@ module.exports = {
     registerReporter,
     loginReporter,
     getMe,
-    updateProfile
+    updateProfile,
+    logoutReporter
 };

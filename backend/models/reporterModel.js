@@ -3,12 +3,15 @@ const mongoose = require('mongoose');
 const reporterSchema = mongoose.Schema({
     name: {
         type: String,
-        required: [true, 'Please add a name']
+        required: [true, 'Please add a name'],
+        trim: true
     },
     email: {
         type: String,
         required: [true, 'Please add an email'],
-        unique: true
+        unique: true,
+        trim: true,
+        lowercase: true
     },
     password: {
         type: String,
@@ -16,7 +19,8 @@ const reporterSchema = mongoose.Schema({
     },
     phone: {
         type: String,
-        required: [true, 'Please add a phone number']
+        required: [true, 'Please add a phone number'],
+        trim: true
     },
     address: {
         type: String,
@@ -25,6 +29,10 @@ const reporterSchema = mongoose.Schema({
     profilePhoto: {
         type: String, // Path to uploaded file
         default: ''
+    },
+    role: {
+        type: String,
+        default: 'reporter'
     }
 }, {
     timestamps: true

@@ -1,88 +1,93 @@
+// ==================== BASE CONFIG ====================
 const API_URL = 'http://localhost:5000/api';
 
-// Check if user is logged in (using localStorage for UI state, but cookies for auth)
+// ==================== LOAD USER FROM LOCALSTORAGE ====================
 let user = null;
 try {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-        user = JSON.parse(userStr);
-    }
-} catch (e) {
-    console.error('Error parsing user from localStorage:', e);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) user = JSON.parse(storedUser);
+} catch (err) {
+    console.error("Error loading user:", err);
 }
 
-// Verify authentication with server before redirecting
+// ======================================================
+//                    AUTH CHECK FLOW
+// ======================================================
 async function checkAuth() {
     if (!user) {
         window.location.href = '../login.html';
         return false;
     }
-    
+
     try {
-        const response = await fetch(`${API_URL}/reporters/profile`, {
-            credentials: 'include',
-            method: 'GET'
+        const res = await fetch(`${API_URL}/reporters/profile`, {
+            method: 'GET',
+            credentials: 'include'
         });
-        
-        if (!response.ok && response.status === 401) {
-            // Token expired or invalid
+
+        if (!res.ok && res.status === 401) {
             localStorage.removeItem('user');
             localStorage.removeItem('role');
             window.location.href = '../login.html';
             return false;
         }
+
         return true;
-    } catch (error) {
-        console.error('Auth check failed:', error);
-        // Don't redirect on network errors, let the page load
+    } catch (err) {
+        console.warn("Auth check failed:", err);
         return true;
     }
 }
 
-// Verify authentication asynchronously (don't block page load)
-(async () => {
-    if (!user) {
-        // No user in localStorage, redirect immediately
-        window.location.href = '../login.html';
-        return;
-    }
-    
-    // Verify token is still valid with server
-    try {
-        const response = await fetch(`${API_URL}/reporters/profile`, {
-            credentials: 'include',
-            method: 'GET'
-        });
-        
-        if (!response.ok && response.status === 401) {
-            // Token expired or invalid
-            localStorage.removeItem('user');
-            localStorage.removeItem('role');
+// Skip auth check if fresh login
+const justLoggedIn = sessionStorage.getItem("justLoggedIn");
+if (justLoggedIn) {
+    sessionStorage.removeItem("justLoggedIn");
+    console.log("Fresh login detected — skipping auth validation");
+} else {
+    // Normal load: check with a delay so UI doesn't freeze
+    setTimeout(async () => {
+        if (!user) {
             window.location.href = '../login.html';
+            return;
         }
-    } catch (error) {
-        // Network error - don't redirect, let page load
-        console.error('Auth verification failed:', error);
-    }
-})();
 
-// Display User Name
-const userNameElement = document.getElementById('userName');
-if (userNameElement && user.name) {
+        try {
+            const res = await fetch(`${API_URL}/reporters/profile`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!res.ok && res.status === 401) {
+                localStorage.removeItem('user');
+                localStorage.removeItem('role');
+                window.location.href = '../login.html';
+            }
+        } catch (err) {
+            console.warn("Background auth check error:", err);
+        }
+    }, 1500);
+}
+
+// Display user name in dashboard
+const userNameElement = document.getElementById("userName");
+if (userNameElement && user?.name) {
     userNameElement.textContent = user.name;
 }
 
-// Logout Function
+// ========================== LOGOUT =============================
 window.logout = function () {
     localStorage.removeItem('user');
     localStorage.removeItem('role');
-    showToast('Logged out successfully', 'success');
+    showToast("Logged out successfully", "success");
     setTimeout(() => {
         window.location.href = '../login.html';
     }, 1000);
 };
 
-// ==================== REPORT INCIDENT ====================
+// ======================================================
+//                 REPORT INCIDENT FORM
+// ======================================================
 const reportForm = document.getElementById('reportForm');
 
 if (reportForm) {
@@ -90,137 +95,104 @@ if (reportForm) {
         e.preventDefault();
 
         const formData = new FormData(reportForm);
-        const submitBtn = reportForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
 
+        const submitBtn = reportForm.querySelector("button[type='submit']");
+        const original = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
         submitBtn.disabled = true;
 
         try {
-            const response = await fetch(`${API_URL}/reports/submit-authenticated`, {
+            const res = await fetch(`${API_URL}/reports/submit-authenticated`, {
                 method: 'POST',
-                credentials: 'include',
-                body: formData
+                body: formData,
+                credentials: 'include'
             });
 
-            let data;
-            try {
-                data = await response.json();
-            } catch (e) {
-                if (response.status === 401) {
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('role');
-                    showToast('Session expired. Please login again.', 'error');
-                    setTimeout(() => {
-                        window.location.href = '../login.html';
-                    }, 2000);
-                    return;
-                }
-                throw new Error('Invalid response from server');
-            }
+            const data = await res.json();
 
-            if (response.ok) {
-                showToast(`Report Submitted Successfully! Tracking ID: ${data.trackingId}`, 'success');
+            if (res.ok) {
+                showToast(`Report Submitted! Tracking ID: ${data.trackingId}`, 'success');
                 setTimeout(() => {
                     window.location.href = 'my-reports.html';
-                }, 2000);
+                }, 1500);
             } else {
-                if (response.status === 401) {
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('role');
-                    showToast('Session expired. Please login again.', 'error');
-                    setTimeout(() => {
-                        window.location.href = '../login.html';
-                    }, 2000);
+                if (res.status === 401) {
+                    localStorage.clear();
+                    showToast("Session expired. Login again.", "error");
+                    window.location.href = '../login.html';
                     return;
                 }
-                throw new Error(data.message || 'Submission failed');
+                throw new Error(data.message || "Submission failed");
             }
-        } catch (error) {
-            showToast(error.message, 'error');
+        } catch (err) {
+            showToast(err.message, "error");
         } finally {
-            submitBtn.innerHTML = originalText;
+            submitBtn.innerHTML = original;
             submitBtn.disabled = false;
         }
     });
 }
 
-// ==================== PROFILE MANAGEMENT ====================
-const profileForm = document.getElementById('profileForm');
+// ======================================================
+//               LOAD USER PROFILE (Profile Page)
+// ======================================================
+const profileForm = document.getElementById("profileForm");
 
 if (profileForm) {
-    // Load Profile Data
-    async function loadProfile() {
+    (async function loadProfile() {
         try {
-            const response = await fetch(`${API_URL}/reporters/profile`, {
+            const res = await fetch(`${API_URL}/reporters/profile`, {
                 credentials: 'include'
             });
-            
-            if (!response.ok) {
-                if (response.status === 401) {
-                    // Clear invalid session
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('role');
-                    // Only redirect if we're on a protected page
-                    if (window.location.pathname.includes('profile.html') || 
-                        window.location.pathname.includes('my-reports.html') ||
-                        window.location.pathname.includes('report-incident.html')) {
-                        window.location.href = '../login.html';
-                    }
-                    return;
-                }
-                throw new Error('Failed to load profile');
-            }
-            
-            let data;
-            try {
-                data = await response.json();
-            } catch (e) {
-                throw new Error('Invalid response from server');
+
+            if (res.status === 401) {
+                localStorage.clear();
+                window.location.href = '../login.html';
+                return;
             }
 
-            if (response.ok) {
-                document.getElementById('name').value = data.name || '';
-                document.getElementById('email').value = data.email || '';
-                document.getElementById('phone').value = data.phone || '';
-                document.getElementById('address').value = data.address || '';
-                
-                // Handle profile photo
-                const photoPreview = document.getElementById('profilePhotoPreview');
-                const photoPlaceholder = document.getElementById('profilePhotoPlaceholder');
-                if (data.profilePhoto) {
-                    photoPreview.src = `http://localhost:5000/${data.profilePhoto}`;
-                    photoPreview.style.display = 'block';
-                    photoPlaceholder.style.display = 'none';
-                } else {
-                    photoPreview.style.display = 'none';
-                    photoPlaceholder.style.display = 'flex';
-                }
+            const data = await res.json();
+
+            document.getElementById("name").value = data.name || '';
+            document.getElementById("email").value = data.email || '';
+            document.getElementById("phone").value = data.phone || '';
+            document.getElementById("address").value = data.address || '';
+
+            const preview = document.getElementById("profilePhotoPreview");
+            const placeholder = document.getElementById("profilePhotoPlaceholder");
+
+            if (data.profilePhoto) {
+                preview.src = `http://localhost:5000/${data.profilePhoto}`;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                preview.style.display = 'none';
+                placeholder.style.display = 'flex';
             }
-        } catch (error) {
-            console.error('Error loading profile:', error);
+
+        } catch (err) {
+            console.error("Profile load error:", err);
         }
-    }
-    loadProfile();
+    })();
 
     // Profile photo preview
-    const profilePhotoInput = document.getElementById('profilePhoto');
+    const profilePhotoInput = document.getElementById("profilePhoto");
     if (profilePhotoInput) {
-        profilePhotoInput.addEventListener('change', function(e) {
+        profilePhotoInput.addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 if (file.size > 5 * 1024 * 1024) {
-                    showToast('File size must be less than 5MB', 'error');
+                    showToast('Max 5MB allowed', 'error');
                     e.target.value = '';
                     return;
                 }
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const photoPreview = document.getElementById('profilePhotoPreview');
-                    const photoPlaceholder = document.getElementById('profilePhotoPlaceholder');
-                    photoPreview.src = e.target.result;
-                    photoPreview.style.display = 'block';
-                    photoPlaceholder.style.display = 'none';
+                reader.onload = ev => {
+                    const preview = document.getElementById("profilePhotoPreview");
+                    const placeholder = document.getElementById("profilePhotoPlaceholder");
+                    preview.src = ev.target.result;
+                    preview.style.display = "block";
+                    placeholder.style.display = "none";
                 };
                 reader.readAsDataURL(file);
             }
@@ -228,194 +200,126 @@ if (profileForm) {
     }
 
     // Update Profile
-    let isSubmitting = false;
     profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Prevent multiple submissions
-        if (isSubmitting) {
-            return;
-        }
+        const formData = new FormData(profileForm);
 
-        const name = document.getElementById('name').value;
-        const phone = document.getElementById('phone').value;
-        const address = document.getElementById('address').value;
-        const profilePhoto = document.getElementById('profilePhoto').files[0];
-
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('phone', phone);
-        formData.append('address', address);
-        if (profilePhoto) {
-            formData.append('profilePhoto', profilePhoto);
-        }
-
-        const submitBtn = profileForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        submitBtn.disabled = true;
-        isSubmitting = true;
+        const button = profileForm.querySelector("button[type='submit']");
+        const original = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        button.disabled = true;
 
         try {
-            const response = await fetch(`${API_URL}/reporters/profile`, {
+            const res = await fetch(`${API_URL}/reporters/profile`, {
                 method: 'PUT',
-                credentials: 'include',
-                body: formData
+                body: formData,
+                credentials: 'include'
             });
 
-            let data;
-            try {
-                data = await response.json();
-            } catch (e) {
-                throw new Error('Invalid response from server');
-            }
+            const data = await res.json();
 
-            if (response.ok) {
-                showToast('Profile updated successfully!', 'success');
-                
-                // Update profile photo preview if a new photo was uploaded
-                if (profilePhoto) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const photoPreview = document.getElementById('profilePhotoPreview');
-                        const photoPlaceholder = document.getElementById('profilePhotoPlaceholder');
-                        photoPreview.src = e.target.result;
-                        photoPreview.style.display = 'block';
-                        photoPlaceholder.style.display = 'none';
-                    };
-                    reader.readAsDataURL(profilePhoto);
-                }
-                
-                // Clear file input
-                document.getElementById('profilePhoto').value = '';
-                
-                // Prevent form resubmission warning
-                if (window.history.replaceState) {
-                    window.history.replaceState(null, '', window.location.href);
-                }
-                
-                // Reload profile data from server to get updated photo URL
-                await loadProfile();
+            if (res.ok) {
+                showToast("Profile updated successfully!", "success");
             } else {
-                throw new Error(data.message || 'Update failed');
+                throw new Error(data.message || "Failed to update profile");
             }
-        } catch (error) {
-            showToast(error.message, 'error');
+        } catch (err) {
+            showToast(err.message, "error");
         } finally {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-            isSubmitting = false;
+            button.innerHTML = original;
+            button.disabled = false;
         }
     });
 }
 
-// ==================== MY REPORTS ====================
-const reportsList = document.querySelector('.reports-list'); // Assuming a container exists or will be added
-
-if (window.location.pathname.includes('my-reports.html')) {
+// ======================================================
+//                 LOAD MY REPORTS PAGE
+// ======================================================
+if (window.location.pathname.includes("my-reports.html")) {
     async function loadMyReports() {
         try {
-            const response = await fetch(`${API_URL}/reports/my-reports`, {
+            const res = await fetch(`${API_URL}/reports/my-reports`, {
                 credentials: 'include'
             });
-            
-            if (!response.ok) {
-                if (response.status === 401) {
-                    // Clear invalid session
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('role');
-                    window.location.href = '../login.html';
-                    return;
-                }
-                throw new Error('Failed to load reports');
-            }
-            
-            let reports;
-            try {
-                reports = await response.json();
-            } catch (e) {
-                throw new Error('Invalid response from server');
+
+            if (res.status === 401) {
+                localStorage.clear();
+                window.location.href = '../login.html';
+                return;
             }
 
-            const container = document.querySelector('main.container');
-            // Clear existing dummy content if any, or append
-            // For now, let's replace the content or create a list
+            const reports = await res.json();
+            const container = document.querySelector(".reports-grid");
 
-            let html = '<h2>My Reports</h2><div class="reports-grid">';
+            if (!container) return;
+
+            container.innerHTML = "";
 
             if (reports.length === 0) {
-                html += '<p>No reports found.</p>';
-            } else {
-                reports.forEach(report => {
-                    const isWithdrawn = report.withdrawn || report.status === 'Withdrawn';
-                    html += `
-                        <div class="report-card" style="${isWithdrawn ? 'opacity: 0.6;' : ''}">
-                            <div class="report-header">
-                                <span class="report-id">${report.trackingId}</span>
-                                <span class="badge badge-${isWithdrawn ? 'withdrawn' : report.status.toLowerCase().replace(' ', '-')}">${isWithdrawn ? 'Withdrawn' : report.status}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <strong><i class="fas fa-tag" style="color: var(--primary-color);"></i> ${report.type}</strong>
-                                <small style="color: var(--text-secondary);"><i class="far fa-calendar-alt"></i> ${new Date(report.date).toLocaleDateString()}</small>
-                            </div>
-                            <p style="color: var(--text-primary); line-height: 1.5;">${report.description.substring(0, 150)}${report.description.length > 150 ? '...' : ''}</p>
-                            ${!isWithdrawn ? `
-                            <div style="margin-top: 15px; text-align: right;">
-                                <button onclick="withdrawReport('${report._id}')" class="btn btn-outline" style="font-size: 0.9em;">
-                                    <i class="fas fa-times-circle"></i> Withdraw Report
-                                </button>
-                            </div>
-                            ` : ''}
-                        </div>
-                    `;
-                });
+                container.innerHTML = "<p>No reports submitted yet.</p>";
+                return;
             }
-            html += '</div>';
 
-            // Insert after title
-            const h1 = container.querySelector('h1');
-            if (h1) h1.insertAdjacentHTML('afterend', html);
+            reports.forEach(report => {
+                const isWithdrawn = report.withdrawn || report.status === "Withdrawn";
 
-        } catch (error) {
-            console.error('Error loading reports:', error);
+                container.innerHTML += `
+                    <div class="report-card" style="${isWithdrawn ? "opacity:0.6" : ""}">
+                        <div class="report-header">
+                            <span class="report-id">${report.trackingId}</span>
+                            <span class="badge badge-${isWithdrawn ? "withdrawn" : report.status.toLowerCase()}">
+                                ${isWithdrawn ? "Withdrawn" : report.status}
+                            </span>
+                        </div>
+
+                        <strong><i class="fas fa-tag"></i> ${report.type}</strong>
+                        <small><i class="far fa-calendar-alt"></i> 
+                            ${new Date(report.date).toLocaleDateString()}
+                        </small>
+
+                        <p>${report.description.substring(0, 150)}${
+                            report.description.length > 150 ? "..." : ""
+                        }</p>
+
+                        ${!isWithdrawn ? `
+                            <button onclick="withdrawReport('${report._id}')" class="btn btn-outline">
+                                <i class="fas fa-times-circle"></i> Withdraw
+                            </button>
+                        ` : ""}
+                    </div>
+                `;
+            });
+
+        } catch (err) {
+            console.error("My reports load error:", err);
         }
     }
+
     loadMyReports();
 }
 
-// ==================== WITHDRAW REPORT ====================
-window.withdrawReport = async function(reportId) {
-    if (!confirm('Are you sure you want to withdraw this report? This action cannot be undone, but the report will still be visible to admins.')) {
-        return;
-    }
+// ======================================================
+//                   WITHDRAW REPORT
+// ======================================================
+window.withdrawReport = async function (id) {
+    if (!confirm("Are you sure you want to withdraw this report?")) return;
 
     try {
-        const response = await fetch(`${API_URL}/reports/${reportId}/withdraw`, {
+        const res = await fetch(`${API_URL}/reports/${id}/withdraw`, {
             method: 'PUT',
             credentials: 'include'
         });
 
-        let data;
-        try {
-            data = await response.json();
-        } catch (e) {
-            throw new Error('Invalid response from server');
-        }
+        const data = await res.json();
 
-        if (response.ok) {
-            showToast('Report withdrawn successfully', 'success');
-            // Reload reports
-            setTimeout(() => {
-                if (window.location.pathname.includes('my-reports.html')) {
-                    loadMyReports();
-                } else {
-                    window.location.reload();
-                }
-            }, 1000);
+        if (res.ok) {
+            showToast("Report withdrawn", "success");
+            setTimeout(() => window.location.reload(), 800);
         } else {
-            throw new Error(data.message || 'Failed to withdraw report');
+            throw new Error(data.message || "Withdraw failed");
         }
-    } catch (error) {
-        showToast(error.message, 'error');
+    } catch (err) {
+        showToast(err.message, "error");
     }
 };

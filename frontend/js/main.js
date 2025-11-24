@@ -1,11 +1,11 @@
 // ==================== CONFIG ====================
-const STATS_API_URL = '/data/stats.json'; // place a data/stats.json file OR point to a real API endpoint
+const API_STATS = 'http://localhost:5000/api/reports/stats';
 
 // ==================== MOBILE MENU TOGGLE ====================
 const mobileMenu = document.getElementById('mobile-menu');
 const navLinks = document.querySelector('.nav-links');
 
-if (mobileMenu) {
+if (mobileMenu && navLinks) {
     mobileMenu.addEventListener('click', () => {
         navLinks.classList.toggle('active');
         const icon = mobileMenu.querySelector('i');
@@ -16,33 +16,31 @@ if (mobileMenu) {
 // ==================== SMOOTH SCROLL ====================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
-        // allow links to other pages
-        if (this.getAttribute('href') === '#') return;
+        const href = this.getAttribute('href');
+        if (href === '#' || !document.querySelector(href)) return;
         e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
+        document.querySelector(href).scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
     });
 });
 
-// ==================== STATS FETCH (with fallback) ====================
+// ==================== STATS FETCH ====================
 async function fetchStats() {
     try {
-        const resp = await fetch(STATS_API_URL, { cache: 'no-store' });
-        if (!resp.ok) throw new Error('Network response was not ok');
-        const json = await resp.json();
+        const resp = await fetch(API_STATS, { cache: 'no-store' });
+        if (!resp.ok) throw new Error("Stats API failed");
+
+        const data = await resp.json();
         return {
-            users: Number(json.users || json.registered || 0),
-            reported: Number(json.reported || json.cases_reported || 0),
-            resolved: Number(json.resolved || json.cases_resolved || 0),
-            response_hours: Number(json.response_hours || json.avg_response || 0)
+            users: 12000, // static because backend doesn't return users
+            reported: data.total || 0,
+            resolved: data.resolved || 0,
+            response_hours: data.avgResponseTime || 48
         };
     } catch (err) {
-        console.warn('Stats fetch failed, using fallback values.', err);
+        console.warn('Stats fetch failed. Using defaults.', err);
         return {
             users: 15420,
             reported: 8754,
@@ -52,78 +50,66 @@ async function fetchStats() {
     }
 }
 
-// ==================== COUNTER ANIMATION (observer-driven) ====================
+// ==================== COUNTER ANIMATION ====================
 const counters = document.querySelectorAll('.counter');
 
-const speed = 200;
+function animateCounter(counter, target) {
+    let start = 0;
+    const duration = 1500;
+    const step = Math.max(10, Math.floor(duration / target));
 
-const animateCounterValue = (counter, target) => {
-    const stepTime = Math.max(10, Math.floor(1400 / Math.max(1, target)));
-    let current = 0;
-    const inc = Math.ceil(target / (1400 / stepTime));
-    const timer = setInterval(() => {
-        current += inc;
-        if (current >= target) {
+    const interval = setInterval(() => {
+        start += Math.ceil(target / (duration / step));
+        if (start >= target) {
             counter.innerText = target.toLocaleString();
-            clearInterval(timer);
+            clearInterval(interval);
         } else {
-            counter.innerText = current.toLocaleString();
+            counter.innerText = start.toLocaleString();
         }
-    }, stepTime);
-};
+    }, step);
+}
 
-const observerOptions = { threshold: 0.4, rootMargin: '0px' };
-
-const observer = new IntersectionObserver((entries) => {
+const counterObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const counter = entry.target;
-            const target = Number(counter.getAttribute('data-target')) || 0;
-            animateCounterValue(counter, target);
-            observer.unobserve(counter);
+            const target = Number(counter.dataset.target) || 0;
+            animateCounter(counter, target);
+
+            counterObserver.unobserve(counter);
         }
     });
-}, observerOptions);
+}, { threshold: 0.4 });
 
-// attach observer to counters AFTER we set their data-targets
 function observeCounters() {
-    document.querySelectorAll('.counter').forEach(c => {
-        // reset text to 0 before animating
-        c.innerText = '0';
-        observer.observe(c);
+    counters.forEach(c => {
+        c.innerText = "0";
+        counterObserver.observe(c);
     });
 }
 
-// ==================== NAVBAR SCROLL EFFECT ====================
+// ==================== NAVBAR SHADOW EFFECT ====================
 window.addEventListener('scroll', () => {
     const navbar = document.querySelector('.navbar');
     if (!navbar) return;
-    if (window.scrollY > 50) {
-        navbar.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)';
-    } else {
-        navbar.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-    }
+
+    navbar.style.boxShadow = window.scrollY > 50
+        ? '0 8px 30px rgba(0, 0, 0, 0.12)'
+        : '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
 });
 
-// ==================== INIT: load stats THEN observe counters ====================
+// ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', async () => {
-    // set initial counters to 0 in DOM
-    document.querySelectorAll('.counter').forEach(c => c.innerText = '0');
-
     const stats = await fetchStats();
 
-    // pick counters in order (Registered Users, Cases Reported, Cases Resolved, Avg Response)
-    const counterEls = document.querySelectorAll('.counter');
-    if (counterEls.length >= 4) {
-        counterEls[0].setAttribute('data-target', stats.users);
-        counterEls[1].setAttribute('data-target', stats.reported);
-        counterEls[2].setAttribute('data-target', stats.resolved);
-        counterEls[3].setAttribute('data-target', stats.response_hours);
-    } else {
-        // generic fill: assign best-effort
-        if (counterEls[0]) counterEls[0].setAttribute('data-target', stats.users || 0);
+    const counterList = document.querySelectorAll('.counter');
+
+    if (counterList.length >= 4) {
+        counterList[0].setAttribute('data-target', stats.users);
+        counterList[1].setAttribute('data-target', stats.reported);
+        counterList[2].setAttribute('data-target', stats.resolved);
+        counterList[3].setAttribute('data-target', stats.response_hours);
     }
 
-    // now start observing/animating
     observeCounters();
 });

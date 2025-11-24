@@ -2,39 +2,59 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const { loginAdmin, getMe, updateProfile } = require('../controllers/adminController');
 const { protectAdmin } = require('../middleware/adminMiddleware');
 
-// Multer config for profile photos
+// Ensure upload folder exists
+const profileDir = path.join(__dirname, '../uploads/profiles/');
+if (!fs.existsSync(profileDir)) {
+    fs.mkdirSync(profileDir, { recursive: true });
+}
+
+// Multer storage
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '../uploads/profiles/'))
+        cb(null, profileDir);
     },
     filename: function (req, file, cb) {
-        cb(null, 'admin-profile-' + Date.now() + path.extname(file.originalname))
+        cb(null, 'admin-profile-' + Date.now() + path.extname(file.originalname));
     }
 });
 
-const upload = multer({ 
+// Multer upload config
+const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit for profile photos
+        fileSize: 5 * 1024 * 1024 // 5MB
     },
-    fileFilter: function (req, file, cb) {
+    fileFilter: (req, file, cb) => {
         const allowedTypes = /jpeg|jpg|png|gif/;
         const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
         const mimetype = allowedTypes.test(file.mimetype);
-        
-        if (mimetype && extname) {
-            return cb(null, true);
+
+        if (extname && mimetype) {
+            cb(null, true);
         } else {
-            cb(new Error('Only image files are allowed!'));
+            cb(new Error('Only JPG, PNG, JPEG, GIF files are allowed!'));
         }
     }
 });
 
+// Routes
 router.post('/login', loginAdmin);
 router.get('/profile', protectAdmin, getMe);
-router.put('/profile', protectAdmin, upload.single('profilePhoto'), updateProfile);
+
+// Handle upload with error catch
+router.put('/profile', protectAdmin, (req, res, next) => {
+    upload.single('profilePhoto')(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            return res.status(400).json({ message: err.message });
+        } else if (err) {
+            return res.status(400).json({ message: err.message });
+        }
+        next();
+    });
+}, updateProfile);
 
 module.exports = router;
