@@ -2,36 +2,110 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>User Dashboard | CyberSafe Portal</title>
+
   <link rel="stylesheet" href="../css/style.css">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <script src="../js/toast.js"></script>
-  <script src="../js/main.js" defer></script>
-  <script src="../js/reporter.js" defer></script>
 </head>
 
 <body>
+
   <!-- Navbar -->
   <nav class="navbar">
     <div class="container nav-wrapper">
-      <a href="../index.html" class="logo"><i class="fas fa-shield-alt"></i> CyberSafe</a>
+      <a href="../index.html" class="logo">
+        <i class="fas fa-shield-alt"></i> CyberSafe
+      </a>
+
       <ul class="nav-links">
-        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="dashboard.html" class="active">Dashboard</a></li>
         <li><a href="report-incident.html">Report Incident</a></li>
         <li><a href="track-case.html">Track Case</a></li>
         <li><a href="my-reports.html">My Reports</a></li>
-        <li><a href="profile.html">Profile</a></li>
       </ul>
-      <a href="#" onclick="logout()" class="btn btn-outline">Logout</a>
+
+      <!-- Profile + Logout -->
+      <div class="nav-right">
+        <a href="profile.html" class="profile-icon">
+          <img src="../assets/profile.jpg" alt="Profile" class="profile-pic">
+        </a>
+        <a href="#" onclick="logout()" class="btn btn-outline">Logout</a>
+      </div>
     </div>
   </nav>
 
-  <main class="container">
-    <h1>Welcome, <span id="userName">User</span></h1>
-    <p>Overview of your case statistics and quick actions.</p>
-    <!-- TODO: Insert dashboard widgets -->
-  </main>
+  <!-- Welcome Section -->
+  <section class="hero small-hero">
+    <div class="container">
+      <div class="hero-content">
+
+        <!-- Left Side Text -->
+        <div class="hero-text">
+          <h1>Welcome Back, <span id="userName">User</span> 👋</h1>
+          <p>Your cyber safety dashboard — track reports, check updates, and take quick actions.</p>
+        </div>
+
+        <!-- RIGHT SIDE FLOATING QUOTE CARD -->
+        <div class="hero-image">
+          <div class="floating-card">
+            <i class="fas fa-shield-alt"></i>
+            <h3><i>"When we choose to report crime, we choose to protect our community"</i></h3>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICK ACTIONS FIRST -->
+  <section class="services quick-actions">
+    <div class="container">
+      <div class="section-header">
+        <h2>Quick Actions</h2>
+        <p>Instant access to your most important features</p>
+      </div>
+
+      <div class="services-grid">
+
+        <div class="service-card">
+          <i class="fas fa-file-alt"></i>
+          <h3>Report a New Incident</h3>
+          <p>Submit a cyber complaint quickly and securely</p>
+          <a href="report-incident.html" class="btn btn-light">Report</a>
+        </div>
+
+        <div class="service-card">
+          <i class="fas fa-search"></i>
+          <h3>Track Your Case</h3>
+          <p>Check investigation progress using your token</p>
+          <a href="track-case.html" class="btn btn-light">Track</a>
+        </div>
+
+        <div class="service-card">
+          <i class="fas fa-folder-open"></i>
+          <h3>View My Reports</h3>
+          <p>See all your filed complaints in one place</p>
+          <a href="my-reports.html" class="btn btn-light">Open</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-bottom-compact">
+      <p>&copy; 2025 CyberSafe Portal. All rights reserved.</p>
+    </div>
+  </footer>
+
 </body>
 
 </html>

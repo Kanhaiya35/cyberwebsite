@@ -759,3 +759,23 @@ section {
 /* small utilities */
 .text-muted { color: var(--text-light); font-size: 14px; }
 .center { text-align: center; }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.profile-pic {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+}
+
+.profile-icon {
+  display: flex;
+  align-items: center;
+}
