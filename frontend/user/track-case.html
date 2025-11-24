@@ -5,57 +5,57 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Track Case | CyberSafe Portal</title>
+
   <link rel="stylesheet" href="../css/style.css">
   <script src="../js/toast.js"></script>
-  <script src="../js/main.js" defer></script>
-  <script src="../js/track.js" defer></script>
+
   <script>
-    // Add logout function for track-case page
     window.logout = function () {
-      localStorage.removeItem('user');
-      localStorage.removeItem('role');
-      if (typeof showToast === 'function') {
-        showToast('Logged out successfully', 'success');
-      }
-      setTimeout(() => {
-        window.location.href = '../login.html';
-      }, 1000);
+      localStorage.clear();
+      if (typeof showToast === "function") showToast("Logged out successfully", "success");
+      setTimeout(() => (window.location.href = "../login.html"), 800);
     };
   </script>
+
 </head>
 
 <body>
-  <!-- Navbar -->
+
   <nav class="navbar">
     <div class="container nav-wrapper">
       <a href="dashboard.html" class="logo"><i class="fas fa-shield-alt"></i> CyberSafe</a>
+
       <ul class="nav-links">
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="report-incident.html">Report Incident</a></li>
-        <li><a href="track-case.html" class="active">Track Case</a></li>
+        <li><a class="active" href="track-case.html">Track Case</a></li>
         <li><a href="my-reports.html">My Reports</a></li>
         <li><a href="profile.html">Profile</a></li>
       </ul>
+
       <a href="#" onclick="logout()" class="btn btn-outline">Logout</a>
     </div>
   </nav>
 
-  <main class="container">
-    <h1>Track Your Case</h1>
-    <form id="trackForm">
-      <input type="text" placeholder="Enter your token ID" required>
-      <button type="submit" class="btn btn-primary">Track</button>
+  <main class="container" style="padding: 50px 0;">
+    <h1 style="font-size:32px;">Track Your Case</h1>
+
+    <form id="trackForm" class="dashboard-card" style="margin-top:25px;">
+      <input type="text" placeholder="Enter your case token…" required
+        style="padding:14px; font-size:18px; border-radius:8px; border:2px solid var(--border-color); width:100%;">
+      <button class="btn btn-primary btn-large" style="margin-top:20px;">Track</button>
     </form>
-    <!-- Case Status Display -->
-    <div id="trackResult" class="track-result"
-      style="display: none; margin-top: 2rem; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
-      <h3>Case Status: <span id="statusBadge" class="badge"></span></h3>
-      <p><strong>Tracking ID:</strong> <span id="resultId"></span></p>
+
+    <div id="trackResult" class="dashboard-card" style="display:none; margin-top:25px;">
+      <h3 style="margin-bottom:10px;">Case Status: <span id="statusBadge" class="badge"></span></h3>
+      <p><strong>ID:</strong> <span id="resultId"></span></p>
       <p><strong>Type:</strong> <span id="resultType"></span></p>
       <p><strong>Date Reported:</strong> <span id="resultDate"></span></p>
       <p><strong>Last Updated:</strong> <span id="resultUpdated"></span></p>
     </div>
+
   </main>
+
 </body>
 
 </html>
